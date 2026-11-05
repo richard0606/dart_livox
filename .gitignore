@@ -1,0 +1,24 @@
+# 构建产物与日志
+build/
+install/
+log/
+lidar_logs/
+bags/
+MvSdkLog/
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 建图输出
+*.pcd
+PCD/
+
+# 第三方源码（按 README 单独获取，不纳入本仓库）
+src/livox_ros_driver2/
+src/FAST_LIO_ROS2/
+external/
+
+# 系统文件
+.DS_Store
+*~

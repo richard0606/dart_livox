@@ -1,0 +1,20 @@
+sector_range:
+  ros__parameters:
+    cloud_topic: /cloud_registered_body
+    output_topic: /lidar/sector_target
+
+    # 方向扇区（雷达系：x 前、y 左、z 上；MID-360 垂直 FOV 约 -7°~52°）
+    az_min_deg: -30.0
+    az_max_deg: 30.0
+    el_min_deg: -7.0
+    el_max_deg: 45.0
+
+    # 距离与高度门限
+    range_min_m: 0.5
+    range_max_m: 40.0
+    min_height_m: -2.0
+
+    # 聚类与选择策略
+    voxel_size_m: 0.15
+    min_points: 5
+    select: densest      # nearest | densest

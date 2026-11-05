@@ -1,0 +1,19 @@
+[Unit]
+Description=DART Lidar Stack (Livox MID-360 + FAST-LIO + Target Detection)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=nuc
+Type=simple
+Environment=HOME=/home/nuc
+ExecStart=/home/nuc/ws_livox/run_lidar_stack.sh
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=20
+KillMode=control-group
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

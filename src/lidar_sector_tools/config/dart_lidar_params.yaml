@@ -1,0 +1,41 @@
+dart_lidar_targets:
+  ros__parameters:
+    cloud_topic: /cloud_registered_body
+    world_cloud_topic: /cloud_registered
+    odom_topic: /Odometry
+
+    # 背景扣除：启动后学习 5 秒静态场景，之后只有新出现的点算动态目标
+    use_background: true
+    bg_learn_s: 5.0
+    bg_voxel_m: 0.25
+    bg_max_voxels: 3000000
+    dynamic_hits: 2
+    dynamic_ttl_s: 2.0
+
+    # 扇区：center 0=雷达正前方，180=反装方向
+    az_center_deg: 0.0
+    az_half_width_deg: 30.0
+    el_min_deg: -7.0
+    el_max_deg: 52.0
+
+    # 固定目标（约 25m 的地面/基地目标）
+    fixed_range_min_m: 18.0
+    fixed_range_max_m: 32.0
+    fixed_voxel_m: 0.4
+    fixed_min_points: 8
+
+    # 空中目标（高于雷达约 6m 的飞行物）
+    air_min_height_m: 4.0
+    air_max_range_m: 100.0
+    air_voxel_m: 0.3
+    air_min_points: 2
+    air_assoc_gate_m: 3.0
+    air_max_age_s: 1.5
+    air_path_len: 60
+
+    # 落点预测（抛体拟合，与 z=impact_z_target_m 平面求交）
+    impact_topic: /lidar/impact_point
+    impact_z_target_m: 0.0
+    impact_fit_points: 12
+    impact_min_points: 4
+    gravity: 9.81
