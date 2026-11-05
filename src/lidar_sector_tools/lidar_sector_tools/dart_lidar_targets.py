@@ -47,6 +47,10 @@ class DartLidarTargets(Node):
         self.declare_parameter('bg_learn_s', 5.0)      # 启动后学习背景的时长
         self.declare_parameter('bg_voxel_m', 0.25)
         self.declare_parameter('bg_max_voxels', 3000000)
+        # 缓慢更新背景：体素连续出现这么多帧后并入背景（0=不更新）。
+        # 雷达小幅移动后，新视角下原本静止的物体会慢慢被重新学习为背景；
+        # 飞行物只出现几帧，达不到这个阈值，不会被误吸收。
+        self.declare_parameter('bg_update_hits', 30)
         self.declare_parameter('dynamic_hits', 2)      # 连续出现多少帧才确认为动态
         self.declare_parameter('dynamic_ttl_s', 2.0)   # 动态体素记忆时长
 
@@ -76,6 +80,7 @@ class DartLidarTargets(Node):
         self.declare_parameter('impact_z_target_m', 0.0)   # 地面目标高度（雷达系 z）
         self.declare_parameter('impact_fit_points', 12)    # 参与拟合的最近轨迹点数
         self.declare_parameter('impact_min_points', 4)     # 最少点数才预测
+        self.declare_parameter('impact_max_residual_m', 1.0)  # 残差超过则不发布（0=不过滤）
         self.declare_parameter('gravity', 9.81)
 
         self.fixed_pub = self.create_publisher(
@@ -217,6 +222,17 @@ class DartLidarTargets(Node):
             self.dyn_hits[k] -= 1
             if self.dyn_hits[k] <= 0:
                 self.dyn_hits.pop(k, None)
+
+        # 缓慢并入背景：连续出现足够久的体素视为静态。
+        # 雷达小幅移动后，新视角下的静止物体会在约 bg_update_hits 帧后被重新学习；
+        # 空中飞行物通常只停留几帧，达不到阈值。
+        update_hits = int(self.get_parameter('bg_update_hits').value)
+        if update_hits > 0 and len(self.bg) < int(self.get_parameter('bg_max_voxels').value):
+            for k in list(seen):
+                if k not in self.bg and self.dyn_hits.get(k, 0) >= update_hits:
+                    self.bg.add(k)
+                    self.dyn_hits.pop(k, None)
+                    self.dyn_last.pop(k, None)
 
         if not dyn_idx:
             self.air_pub.publish(Float32MultiArray())
@@ -410,6 +426,12 @@ class DartLidarTargets(Node):
         pred_z = z0 + vz * ts - 0.5 * g * ts * ts
         resid = float(np.sqrt(np.mean(
             (xs - pred_x) ** 2 + (ys - pred_y) ** 2 + (zs - pred_z) ** 2)))
+
+        # 拟合质量太差时不发布落点，避免噪声触发误报
+        max_resid = float(self.get_parameter('impact_max_residual_m').value)
+        if max_resid > 0.0 and resid > max_resid:
+            self.impact_pub.publish(Float32MultiArray())
+            return
 
         # 剩余时间：从当前时刻到落点（ts 以 t0 为零点）
         remaining = max(0.0, t_impact - (now - t0))

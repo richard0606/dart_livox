@@ -9,6 +9,7 @@ dart_lidar_targets:
     bg_learn_s: 5.0
     bg_voxel_m: 0.25
     bg_max_voxels: 3000000
+    bg_update_hits: 30
     dynamic_hits: 2
     dynamic_ttl_s: 2.0
 
@@ -38,4 +39,5 @@ dart_lidar_targets:
     impact_z_target_m: 0.0
     impact_fit_points: 12
     impact_min_points: 4
+    impact_max_residual_m: 1.0
     gravity: 9.81
