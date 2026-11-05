@@ -53,6 +53,11 @@ stop_stack() {
   for p in "${CHILD_PIDS[@]:-}"; do
     kill -TERM "$p" 2>/dev/null || true
   done
+  sleep 2
+  # launch 偶尔会留下子节点（SIGINT 转发超时），按本工作区 install 路径兜底清理。
+  # 只匹配本工作区的可执行文件，不会误杀其他进程。
+  pkill -f "$HOME/ws_livox/install" 2>/dev/null || true
+  sleep 1
   wait 2>/dev/null || true
   CHILD_PIDS=()
 }

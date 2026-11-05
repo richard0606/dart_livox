@@ -64,8 +64,11 @@ ros2 launch lidar_sector_tools dart_lidar_targets.launch.py
 sudo install -m 644 dart_lidar.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now dart_lidar.service
-# 日志：~/ws_livox/lidar_logs/
+# 日志：~/ws_livox/lidar_logs/（每次重启归档为 *.log.1）
 ```
+
+`run_lidar_stack.sh` 内置看门狗：每 5 秒检查 `livox_lidar_publisher`、`laser_mapping`、
+`dart_lidar_targets` 三个节点，连续两次缺失自动重启整套（实测约 30 秒恢复）。
 
 ## 网络
 
@@ -83,5 +86,7 @@ sudo systemctl enable --now dart_lidar.service
 | `fixed_range_min_m/max_m` | 18/32 | 固定目标距离窗口 |
 | `air_min_height_m` | 4 | 空中目标最低高度（雷达系 z） |
 | `bg_learn_s` | 5 | 启动后静态背景学习时长 |
+| `bg_update_hits` | 30 | 体素连续出现多少帧后并入背景（雷达移动后自适应；0=关闭） |
 | `dynamic_hits` | 2 | 连续多少帧确认动态目标 |
 | `impact_z_target_m` | 0 | 落点预测的地面目标高度 |
+| `impact_max_residual_m` | 1.0 | 落点拟合残差超过此值不发布（0=不过滤） |
